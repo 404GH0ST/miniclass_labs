@@ -1,0 +1,9 @@
+---
+- name: Configure the Week 6 manual validation target
+  hosts: week6
+  become: true
+  vars:
+    lab_profile: week6
+  roles:
+    - common
+    - training_app

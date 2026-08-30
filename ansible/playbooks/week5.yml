@@ -1,0 +1,9 @@
+---
+- name: Configure the Week 5 web discovery target
+  hosts: week5
+  become: true
+  vars:
+    lab_profile: week5
+  roles:
+    - common
+    - training_app

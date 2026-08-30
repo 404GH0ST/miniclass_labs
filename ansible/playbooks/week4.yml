@@ -1,0 +1,10 @@
+---
+- name: Configure the Week 4 multi-service enumeration target
+  hosts: week4
+  become: true
+  vars:
+    lab_ip: 192.168.56.40
+    lab_profile: week4
+  roles:
+    - common
+    - target

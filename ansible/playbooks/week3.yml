@@ -1,0 +1,7 @@
+---
+- name: Configure the Week 3 scanning target
+  hosts: week3
+  become: true
+  roles:
+    - common
+    - scan_target

@@ -1,0 +1,10 @@
+---
+- name: Configure the Week 8 readiness-gate target
+  hosts: week8
+  become: true
+  vars:
+    lab_profile: week8
+  roles:
+    - common
+    - training_app
+    - operations_target

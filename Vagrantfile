@@ -3,7 +3,7 @@ bridge_enabled = !bridge_interface.nil? && !bridge_interface.empty?
 
 def provision_with_ansible(machine, machine_name, address, bridge_enabled)
   machine.vm.provision "ansible" do |ansible|
-    ansible.playbook = "ansible/site.yml"
+    ansible.playbook = "ansible/playbooks/#{machine_name}.yml"
     ansible.config_file = "ansible.cfg"
     ansible.limit = machine_name
     ansible.compatibility_mode = "2.0"

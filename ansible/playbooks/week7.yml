@@ -1,0 +1,7 @@
+---
+- name: Configure the Week 7 shell-operations target
+  hosts: week7
+  become: true
+  roles:
+    - common
+    - operations_target
