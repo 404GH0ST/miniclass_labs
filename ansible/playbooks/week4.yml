@@ -6,5 +6,5 @@
     lab_ip: 192.168.56.40
     lab_profile: week4
   roles:
-    - common
-    - target
+    - platform_common
+    - week4_enumeration

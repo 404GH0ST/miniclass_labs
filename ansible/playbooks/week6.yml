@@ -5,5 +5,5 @@
   vars:
     lab_profile: week6
   roles:
-    - common
-    - training_app
+    - platform_common
+    - week6_validation

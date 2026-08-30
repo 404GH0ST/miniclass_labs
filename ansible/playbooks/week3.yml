@@ -3,5 +3,5 @@
   hosts: week3
   become: true
   roles:
-    - common
-    - scan_target
+    - platform_common
+    - week3_scan_target

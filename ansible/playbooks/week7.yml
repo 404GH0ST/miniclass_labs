@@ -3,5 +3,5 @@
   hosts: week7
   become: true
   roles:
-    - common
-    - operations_target
+    - platform_common
+    - week7_operations

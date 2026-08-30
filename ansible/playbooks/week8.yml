@@ -5,6 +5,5 @@
   vars:
     lab_profile: week8
   roles:
-    - common
-    - training_app
-    - operations_target
+    - platform_common
+    - week8_readiness
