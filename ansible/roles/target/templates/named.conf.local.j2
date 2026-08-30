@@ -1,0 +1,11 @@
+zone "wri.local" {
+    type primary;
+    file "/etc/bind/db.wri.local";
+    allow-transfer { any; };
+};
+
+zone "56.168.192.in-addr.arpa" {
+    type primary;
+    file "/etc/bind/db.192.168.56";
+    allow-transfer { none; };
+};

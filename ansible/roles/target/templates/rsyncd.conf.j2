@@ -1,0 +1,12 @@
+uid = nobody
+gid = nogroup
+use chroot = yes
+read only = yes
+list = yes
+address = {{ lab_bind_ip }}
+
+[public]
+    path = /srv/rsync/public
+    comment = WRI CySec public training module
+    read only = yes
+    list = yes

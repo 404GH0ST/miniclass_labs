@@ -1,0 +1,52 @@
+---
+- name: Configure every lab machine
+  hosts: all
+  become: true
+  roles:
+    - common
+
+- name: Configure the Week 3 scanning target
+  hosts: week3
+  become: true
+  roles:
+    - scan_target
+
+- name: Configure the Week 4 multi-service enumeration target
+  hosts: week4
+  become: true
+  vars:
+    lab_ip: 192.168.56.40
+    lab_profile: week4
+  roles:
+    - target
+
+- name: Configure the Week 5 web discovery target
+  hosts: week5
+  become: true
+  vars:
+    lab_profile: week5
+  roles:
+    - training_app
+
+- name: Configure the Week 6 manual validation target
+  hosts: week6
+  become: true
+  vars:
+    lab_profile: week6
+  roles:
+    - training_app
+
+- name: Configure the Week 7 shell-operations target
+  hosts: week7
+  become: true
+  roles:
+    - operations_target
+
+- name: Configure the Week 8 readiness-gate target
+  hosts: week8
+  become: true
+  vars:
+    lab_profile: week8
+  roles:
+    - training_app
+    - operations_target

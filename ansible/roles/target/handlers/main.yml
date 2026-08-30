@@ -1,0 +1,46 @@
+---
+- name: Restart vsftpd
+  ansible.builtin.service:
+    name: vsftpd
+    state: restarted
+
+- name: Restart ssh
+  ansible.builtin.service:
+    name: ssh
+    state: restarted
+
+- name: Restart smbd
+  ansible.builtin.service:
+    name: smbd
+    state: restarted
+
+- name: Restart rsync lab
+  ansible.builtin.systemd:
+    name: wri-rsync-lab
+    state: restarted
+    daemon_reload: true
+
+- name: Restart snmpd
+  ansible.builtin.service:
+    name: snmpd
+    state: restarted
+
+- name: Restart postfix
+  ansible.builtin.service:
+    name: postfix
+    state: restarted
+
+- name: Restart mail lab
+  ansible.builtin.systemd:
+    name: wri-mail-lab
+    state: restarted
+    daemon_reload: true
+
+- name: Restart named
+  ansible.builtin.service:
+    name: named
+    state: restarted
+
+- name: Reload NFS exports
+  ansible.builtin.command: /usr/sbin/exportfs -ra
+  changed_when: true

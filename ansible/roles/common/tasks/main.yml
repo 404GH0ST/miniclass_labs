@@ -1,0 +1,26 @@
+---
+- name: Refresh apt metadata
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Install common lab utilities
+  ansible.builtin.apt:
+    name:
+      - curl
+      - netcat-openbsd
+      - python3
+      - unzip
+    state: present
+
+- name: Add lab hostnames
+  ansible.builtin.blockinfile:
+    path: /etc/hosts
+    marker: "# {mark} WRI CYSEC LAB"
+    block: |
+      192.168.56.30 week3
+      192.168.56.40 week4
+      192.168.56.50 week5
+      192.168.56.60 week6
+      192.168.56.70 week7
+      192.168.56.80 week8

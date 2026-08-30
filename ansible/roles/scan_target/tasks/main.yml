@@ -1,0 +1,26 @@
+---
+- name: Install Week 3 discovery services
+  ansible.builtin.apt:
+    name:
+      - nginx
+      - openssh-server
+      - vsftpd
+    state: present
+
+- name: Add the Week 3 web landing page
+  ansible.builtin.copy:
+    content: "WRI CySec Week 3 scanning target. Identify and prioritize exposed services.\n"
+    dest: /var/www/html/index.html
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable Week 3 discovery services
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop:
+    - nginx
+    - ssh
+    - vsftpd

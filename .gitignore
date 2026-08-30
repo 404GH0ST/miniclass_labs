@@ -1,0 +1,5 @@
+# Vagrant machine IDs, provider metadata, and generated local state.
+.vagrant/
+
+# Ansible retry files generated after failed playbook runs.
+*.retry

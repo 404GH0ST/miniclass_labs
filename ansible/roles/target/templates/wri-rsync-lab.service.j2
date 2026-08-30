@@ -1,0 +1,11 @@
+[Unit]
+Description=WRI CySec anonymous rsync training module
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/rsync --daemon --no-detach --config=/etc/rsyncd.conf
+Restart=on-failure
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

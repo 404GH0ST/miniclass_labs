@@ -1,0 +1,1 @@
+/srv/nfs/public {% if lab_bridge_enabled %}*(ro,sync,no_subtree_check,root_squash){% else %}192.168.56.0/24(ro,sync,no_subtree_check,root_squash){% endif %}

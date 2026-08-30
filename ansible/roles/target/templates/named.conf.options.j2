@@ -1,0 +1,9 @@
+options {
+    directory "/var/cache/bind";
+    listen-on { {% if lab_bridge_enabled %}any{% else %}{{ lab_ip }}{% endif %}; };
+    listen-on-v6 { none; };
+    recursion no;
+    allow-query { {% if lab_bridge_enabled %}any{% else %}192.168.56.0/24{% endif %}; };
+    allow-transfer { none; };
+    dnssec-validation auto;
+};

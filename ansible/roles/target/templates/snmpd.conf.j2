@@ -1,0 +1,5 @@
+agentAddress udp:{{ lab_bind_ip }}:161
+sysLocation WRI CySec isolated training lab WRI{{ '{' }}{{ deployment_flags.snmp }}{{ '}' }}
+sysContact /opt/wri-mail-lab.py --username analyst --password MailLab-Only-2026
+sysName target.wri.local
+rocommunity public {{ lab_allowed_network }}

@@ -1,0 +1,17 @@
+[global]
+   workgroup = WORKGROUP
+   server role = standalone server
+   server string = WRI CySec Training SMB
+{% if not lab_bridge_enabled %}
+   interfaces = lo {{ lab_ip }}/24
+   bind interfaces only = yes
+{% endif %}
+   map to guest = Bad User
+   disable spoolss = yes
+   load printers = no
+
+[public]
+   path = /srv/samba/public
+   browseable = yes
+   guest ok = yes
+   read only = yes
