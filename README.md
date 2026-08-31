@@ -9,7 +9,8 @@ Weeks 1 and 2 do not use Vagrant.
 - Vagrant 2.4 or newer
 - VirtualBox 7
 - Ansible Core on the host
-- About 3 GB RAM for one running target
+- Week 4: 4 GB RAM and 2 CPU cores
+- Week 8: 8 GB RAM and 4 CPU cores
 
 ## Setup
 
@@ -41,10 +42,10 @@ Do not use a bare `vagrant up`; weekly targets are intentionally opt-in.
 
 ## Optional Classroom Network
 
-To give participants on an isolated classroom LAN access to a target, set `WRI_LAB_BRIDGE_INTERFACE` to a specific host adapter before starting it:
+To give participants on an isolated classroom LAN access to a target, set `WRI_LAB_BRIDGE_INTERFACE` to the exact VirtualBox adapter name before starting it:
 
 ```bash
-WRI_LAB_BRIDGE_INTERFACE="en0: Wi-Fi" vagrant up week4
+WRI_LAB_BRIDGE_INTERFACE="wlp3s0" vagrant up week4
 ```
 
 On PowerShell:
@@ -60,4 +61,4 @@ Find the bridged address after startup:
 vagrant ssh week4 -c "ip -4 -brief address"
 ```
 
-Use bridging only on a dedicated classroom VLAN or isolated lab router. Never expose these intentionally insecure targets to campus, home, public Wi-Fi, or internet-routed networks.
+Both Week 4 and Week 8 support this opt-in bridge. Use it only on a dedicated classroom VLAN or isolated lab router. Week 8 intentionally exposes unauthenticated RCE through its HTTP challenge, so never bridge either target to campus, home, public Wi-Fi, or an internet-routed network.

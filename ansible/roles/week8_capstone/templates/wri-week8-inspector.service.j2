@@ -1,0 +1,20 @@
+[Unit]
+Description=WRI CySec Week 8 MCPJam Inspector service (CVE-2026-23744 lab)
+After=network.target
+
+[Service]
+User=appsvc
+Group=appsvc
+WorkingDirectory=/opt/wri-week8-inspector/node_modules/@mcpjam/inspector
+Environment=NODE_ENV=production
+Environment=SERVER_PORT=6274
+Environment=NODE_OPTIONS=--experimental-global-webcrypto
+ExecStart=/usr/bin/node /opt/wri-week8-inspector/node_modules/@mcpjam/inspector/dist/server/index.js
+Restart=on-failure
+NoNewPrivileges=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+IPAddressDeny=any
+IPAddressAllow=localhost
+
+[Install]
+WantedBy=multi-user.target

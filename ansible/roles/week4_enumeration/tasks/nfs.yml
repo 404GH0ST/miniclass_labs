@@ -1,0 +1,32 @@
+---
+- name: Create the read-only NFS export
+  ansible.builtin.file:
+    path: /srv/nfs/public
+    state: directory
+    owner: nobody
+    group: nogroup
+    mode: "0755"
+
+- name: Add the NFS enumeration clue
+  ansible.builtin.copy:
+    content: |
+      Read-only training export. Mount only from the participant workstation.
+      NFS enumeration flag: WRI{{ '{' }}{{ deployment_flags.nfs }}{{ '}' }}
+    dest: /srv/nfs/public/flag.txt
+    owner: nobody
+    group: nogroup
+    mode: "0644"
+
+- name: Remove the superseded NFS clue filename
+  ansible.builtin.file:
+    path: /srv/nfs/public/readme.txt
+    state: absent
+
+- name: Configure the NFS export
+  ansible.builtin.template:
+    src: exports.j2
+    dest: /etc/exports
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload NFS exports

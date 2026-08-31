@@ -1,0 +1,78 @@
+---
+- name: Create the MCPJam Inspector installation directory
+  ansible.builtin.file:
+    path: /opt/wri-week8-inspector
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy the locked MCPJam Inspector dependency manifest
+  ansible.builtin.copy:
+    src: inspector/
+    dest: /opt/wri-week8-inspector/
+    owner: root
+    group: root
+    mode: "0644"
+  register: inspector_manifest
+
+- name: Check whether the vulnerable MCPJam Inspector package is installed
+  ansible.builtin.stat:
+    path: /opt/wri-week8-inspector/node_modules/@mcpjam/inspector/dist/server/index.js
+  register: inspector_binary
+
+- name: Install the locked CVE-2026-23744 affected package
+  ansible.builtin.command:
+    cmd: /usr/bin/npm ci --omit=dev --ignore-scripts
+    chdir: /opt/wri-week8-inspector
+  when: inspector_manifest.changed or not inspector_binary.stat.exists
+  notify: Restart Week 8 MCPJam Inspector
+
+- name: Bind MCPJam Inspector to loopback behind Nginx
+  ansible.builtin.replace:
+    path: /opt/wri-week8-inspector/node_modules/@mcpjam/inspector/dist/server/index.js
+    regexp: 'hostname: "0\.0\.0\.0"'
+    replace: 'hostname: "127.0.0.1"'
+  notify: Restart Week 8 MCPJam Inspector
+
+- name: Create the Inspector service configuration tree
+  ansible.builtin.file:
+    path: /opt/wri-week8-services/staging/config
+    state: directory
+    owner: appsvc
+    group: appsvc
+    mode: "0755"
+
+- name: Plant credential reuse material in the Inspector configuration
+  ansible.builtin.copy:
+    content: |
+      # WRI Week 8 migration configuration
+      CASEWORKER_USER=caseworker
+      CASEWORKER_PASSWORD=Cedar!Vault-2026
+    dest: /opt/wri-week8-services/staging/config/ops.env
+    owner: appsvc
+    group: appsvc
+    mode: "0644"
+  no_log: true
+
+- name: Create the RCE evidence directory
+  ansible.builtin.file:
+    path: /srv/wri-week8-artifacts
+    state: directory
+    owner: appsvc
+    group: appsvc
+    mode: "0755"
+
+- name: Remove stale RCE evidence
+  ansible.builtin.file:
+    path: /srv/wri-week8-artifacts/ops.env
+    state: absent
+
+- name: Install the MCPJam Inspector service
+  ansible.builtin.template:
+    src: wri-week8-inspector.service.j2
+    dest: /etc/systemd/system/wri-week8-inspector.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart Week 8 MCPJam Inspector

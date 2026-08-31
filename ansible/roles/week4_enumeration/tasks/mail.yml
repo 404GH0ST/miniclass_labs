@@ -1,0 +1,48 @@
+---
+- name: Store deployment flags for local mail services
+  ansible.builtin.copy:
+    content: |
+      WRI_MAIL_HOST={{ lab_bind_ip }}
+      WRI_POP3_FLAG=WRI{{ '{' }}{{ deployment_flags.pop3 }}{{ '}' }}
+      WRI_IMAP_FLAG=WRI{{ '{' }}{{ deployment_flags.imap }}{{ '}' }}
+    dest: /etc/wri-mail-lab.env
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Restart mail lab
+  no_log: true
+
+- name: Configure isolated SMTP
+  ansible.builtin.template:
+    src: postfix-main.cf.j2
+    dest: /etc/postfix/main.cf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart postfix
+
+- name: Create the mail-disclosed SSH training account
+  ansible.builtin.user:
+    name: operator
+    password: "$6$wri-mail-ssh$iHyUCGqwkBmqkKOe3AbIuy/.I2W9bBsWzN0TsrAuoDy2z5BN3ilpvVO2Im0wPGuyhtwgsL29bpWogODGBPSoK1"
+    shell: /bin/bash
+    create_home: true
+  no_log: true
+
+- name: Deploy the intentionally enumerable POP3 and IMAP service
+  ansible.builtin.copy:
+    src: mail_lab.py
+    dest: /opt/wri-mail-lab.py
+    owner: root
+    group: root
+    mode: "0755"
+  notify: Restart mail lab
+
+- name: Install the POP3 and IMAP lab service
+  ansible.builtin.template:
+    src: wri-mail-lab.service.j2
+    dest: /etc/systemd/system/wri-mail-lab.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart mail lab

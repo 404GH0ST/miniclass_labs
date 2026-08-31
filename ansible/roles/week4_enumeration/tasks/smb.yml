@@ -1,0 +1,33 @@
+---
+- name: Create the read-only SMB share
+  ansible.builtin.file:
+    path: /srv/samba/public
+    state: directory
+    owner: nobody
+    group: nogroup
+    mode: "0755"
+
+- name: Add the SMB enumeration clue
+  ansible.builtin.copy:
+    content: |
+      Guest-readable training share. Authentication testing is out of scope.
+      SMB enumeration flag: WRI{{ '{' }}{{ deployment_flags.smb }}{{ '}' }}
+    dest: /srv/samba/public/flag.txt
+    owner: nobody
+    group: nogroup
+    mode: "0644"
+
+- name: Remove the superseded SMB clue filename
+  ansible.builtin.file:
+    path: /srv/samba/public/readme.txt
+    state: absent
+
+- name: Configure isolated SMB
+  ansible.builtin.template:
+    src: smb.conf.j2
+    dest: /etc/samba/smb.conf
+    owner: root
+    group: root
+    mode: "0644"
+    validate: /usr/bin/testparm -s %s
+  notify: Restart smbd

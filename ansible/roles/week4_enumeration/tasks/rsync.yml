@@ -1,0 +1,36 @@
+---
+- name: Create the read-only rsync module directory
+  ansible.builtin.file:
+    path: /srv/rsync/public
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Add the rsync enumeration flag
+  ansible.builtin.copy:
+    content: |
+      Anonymous read-only rsync training module.
+      Rsync enumeration flag: WRI{{ '{' }}{{ deployment_flags.rsync }}{{ '}' }}
+    dest: /srv/rsync/public/flag.txt
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Configure the anonymous read-only rsync module
+  ansible.builtin.template:
+    src: rsyncd.conf.j2
+    dest: /etc/rsyncd.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart rsync lab
+
+- name: Install the rsync lab service
+  ansible.builtin.template:
+    src: wri-rsync-lab.service.j2
+    dest: /etc/systemd/system/wri-rsync-lab.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart rsync lab

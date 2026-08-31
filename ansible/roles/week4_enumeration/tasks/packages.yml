@@ -1,0 +1,66 @@
+---
+- name: Preseed the Postfix installation type
+  ansible.builtin.debconf:
+    name: postfix
+    question: postfix/main_mailer_type
+    value: "Local only"
+    vtype: select
+
+- name: Preseed the Postfix mail name
+  ansible.builtin.debconf:
+    name: postfix
+    question: postfix/mailname
+    value: target.wri.local
+    vtype: string
+
+- name: Install target services
+  ansible.builtin.apt:
+    name:
+      - bind9
+      - nfs-kernel-server
+      - openssh-server
+      - postfix
+      - rsync
+      - samba
+      - snmpd
+      - vsftpd
+    state: present
+
+- name: Remove Dovecot so the enumerable mail lab owns ports 110 and 143
+  ansible.builtin.apt:
+    name:
+      - dovecot-core
+      - dovecot-imapd
+      - dovecot-pop3d
+    state: absent
+    purge: true
+
+- name: Stop the retired Week 4 HTTP application
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - disable
+      - --now
+      - training-app.service
+  register: retired_http_service
+  changed_when: retired_http_service.rc == 0
+  failed_when: false
+
+- name: Remove retired Week 4 HTTP application files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/systemd/system/training-app.service
+    - /etc/wri-http-lab.env
+    - /var/www/training-app
+
+- name: Remove the retired Week 4 HTTP dependency
+  ansible.builtin.apt:
+    name: python3-flask
+    state: absent
+    purge: true
+
+- name: Reload systemd after removing the Week 4 HTTP application
+  ansible.builtin.systemd:
+    daemon_reload: true

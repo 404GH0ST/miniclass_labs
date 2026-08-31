@@ -1,0 +1,32 @@
+---
+- name: Configure isolated anonymous FTP
+  ansible.builtin.template:
+    src: vsftpd.conf.j2
+    dest: /etc/vsftpd.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart vsftpd
+
+- name: Create the anonymous FTP directory
+  ansible.builtin.file:
+    path: /srv/ftp/pub
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Add the Week 4 FTP enumeration clue
+  ansible.builtin.copy:
+    content: |
+      Training asset only. Record this flag in the evidence sheet.
+      FTP enumeration flag: WRI{{ '{' }}{{ deployment_flags.ftp }}{{ '}' }}
+    dest: /srv/ftp/pub/flag.txt
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Remove the superseded FTP clue filename
+  ansible.builtin.file:
+    path: /srv/ftp/pub/readme.txt
+    state: absent

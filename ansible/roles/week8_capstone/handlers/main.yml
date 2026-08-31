@@ -1,0 +1,27 @@
+---
+- name: Restart Week 8 chat portal
+  ansible.builtin.systemd:
+    name: wri-week8-chat
+    state: restarted
+    daemon_reload: true
+
+- name: Restart Week 8 MCPJam Inspector
+  ansible.builtin.systemd:
+    name: wri-week8-inspector
+    state: restarted
+    daemon_reload: true
+
+- name: Restart Nginx
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
+
+- name: Restart vsftpd
+  ansible.builtin.service:
+    name: vsftpd
+    state: restarted
+
+- name: Restart SSH
+  ansible.builtin.service:
+    name: ssh
+    state: restarted

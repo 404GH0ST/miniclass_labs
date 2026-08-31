@@ -3,18 +3,25 @@ set -euo pipefail
 
 target="${1:-192.168.56.40}"
 tmp_dir="$(mktemp -d)"
-nfs_mounted=false
 flags=()
 
 cleanup() {
-  if [[ "$nfs_mounted" == true ]]; then
-    sudo umount "$tmp_dir/nfs"
-  fi
   rm -f "$tmp_dir/smb.txt" "$tmp_dir/rsync-flag.txt"
-  rmdir "$tmp_dir/nfs" 2>/dev/null || true
   rmdir "$tmp_dir"
 }
 trap cleanup EXIT
+
+if [[ ! "$target" =~ ^[0-9a-fA-F:.]+$ ]]; then
+  printf '[FAIL] Target must be an IPv4 or IPv6 address.\n' >&2
+  exit 1
+fi
+
+for command in curl dig nc rsync smbclient snmpget snmpwalk showmount vagrant; do
+  command -v "$command" >/dev/null || {
+    printf '[FAIL] Required command is missing: %s\n' "$command" >&2
+    exit 1
+  }
+done
 
 check_tcp() {
   local port="$1"
@@ -44,7 +51,7 @@ check_tcp 445 SMB
 check_tcp 873 Rsync
 check_tcp 2049 NFS
 
-record_flag FTP "$(curl --fail --silent "ftp://${target}/pub/flag.txt")"
+record_flag FTP "$(curl --connect-timeout 5 --max-time 15 --fail --silent "ftp://${target}/pub/flag.txt")"
 record_flag SSH "$(nc -w 3 "$target" 22 || true)"
 smtp_result="$(printf 'EHLO verify.wri.local\r\nQUIT\r\n' | nc -w 3 "$target" 25)"
 grep -q 'WRI-MAILGATE' <<<"$smtp_result"
@@ -77,19 +84,15 @@ imap_ssh_mail="$(printf 'a1 LOGIN analyst MailLab-Only-2026\r\na2 SELECT INBOX\r
 grep -q 'SSH username: operator' <<<"$imap_ssh_mail"
 grep -q 'SSH password: LlYcvWqWdJKvvnNmlruUY/bb' <<<"$imap_ssh_mail"
 
-mkdir "$tmp_dir/nfs"
-sudo mount -t nfs -o ro "${target}:/srv/nfs/public" "$tmp_dir/nfs"
-nfs_mounted=true
-record_flag NFS "$(<"$tmp_dir/nfs/flag.txt")"
+nfs_content="$(vagrant ssh week4 -c \
+  "mount_dir=\$(mktemp -d); sudo mount -t nfs -o ro ${target}:/srv/nfs/public \"\$mount_dir\"; cat \"\$mount_dir/flag.txt\"; sudo umount \"\$mount_dir\"; rmdir \"\$mount_dir\"" \
+  2>/dev/null)"
+record_flag NFS "$nfs_content"
 
 dig +short "@${target}" target.wri.local A | grep -qx "$target"
 dig +short "@${target}" intranet.wri.local A | grep -qx "$target"
 dig +short "@${target}" -x "$target" | grep -qx 'target.wri.local.'
 showmount -e "$target" | grep -q '/srv/nfs/public'
-
-udp_scan="$(sudo nmap -Pn -sU -p 53,161 --open "$target")"
-grep -q '53/udp' <<<"$udp_scan"
-grep -q '161/udp' <<<"$udp_scan"
 
 unique_count="$(printf '%s\n' "${flags[@]}" | sort -u | wc -l | tr -d ' ')"
 test "$unique_count" -eq 10

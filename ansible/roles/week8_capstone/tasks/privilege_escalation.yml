@@ -1,0 +1,36 @@
+---
+- name: Install the root maintenance binary for the bonus path
+  ansible.builtin.copy:
+    src: /usr/bin/id
+    dest: /usr/local/bin/week8-maintenance
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Configure the intentional LD_PRELOAD sudo weakness
+  ansible.builtin.copy:
+    content: |
+      Defaults:caseworker env_keep += "LD_PRELOAD"
+      caseworker ALL=(root) NOPASSWD: /usr/local/bin/week8-maintenance
+    dest: /etc/sudoers.d/week8-capstone
+    owner: root
+    group: root
+    mode: "0440"
+    validate: /usr/sbin/visudo -cf %s
+
+- name: Plant the Week 8 user flag
+  ansible.builtin.copy:
+    content: "WRI{week8_user_credential_reuse_complete}\n"
+    dest: /home/caseworker/user.txt
+    owner: caseworker
+    group: caseworker
+    mode: "0640"
+
+- name: Plant the Week 8 root bonus flag
+  ansible.builtin.copy:
+    content: "WRI{week8_root_ld_preload_bonus}\n"
+    dest: /root/root.txt
+    owner: root
+    group: root
+    mode: "0600"

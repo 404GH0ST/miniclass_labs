@@ -47,18 +47,25 @@ Vagrant.configure("2") do |config|
     # This prevents a bare `vagrant up` from consuming resources by deploying every
     # week's lab at once.
     config.vm.define name, autostart: false do |machine|
+      machine_bridge_enabled = bridge_enabled
       machine.vm.hostname = name
       machine.vm.network "private_network", ip: address
-      if bridge_enabled
+      if machine_bridge_enabled
         machine.vm.network "public_network", bridge: bridge_interface
       end
       if name == "week4"
         machine.vm.provider "virtualbox" do |vb|
-          vb.memory = 1536
+          vb.memory = 4096
           vb.cpus = 2
         end
       end
-      provision_with_ansible(machine, name, address, bridge_enabled)
+      if name == "week8"
+        machine.vm.provider "virtualbox" do |vb|
+          vb.memory = 8192
+          vb.cpus = 4
+        end
+      end
+      provision_with_ansible(machine, name, address, machine_bridge_enabled)
     end
   end
 end

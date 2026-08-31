@@ -1,0 +1,22 @@
+---
+- name: Configure the capstone virtual hosts
+  ansible.builtin.template:
+    src: week8-vhosts.conf.j2
+    dest: /etc/nginx/sites-available/wri-week8
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart Nginx
+
+- name: Enable the capstone virtual hosts
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/wri-week8
+    dest: /etc/nginx/sites-enabled/wri-week8
+    state: link
+  notify: Restart Nginx
+
+- name: Disable the default Nginx virtual host
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Restart Nginx

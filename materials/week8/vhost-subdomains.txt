@@ -1,0 +1,6 @@
+www
+portal
+chat
+mail
+dev
+staging

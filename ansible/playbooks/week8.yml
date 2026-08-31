@@ -1,9 +1,9 @@
 ---
-- name: Configure the Week 8 readiness-gate target
+- name: Configure the Week 8 capstone target
   hosts: week8
   become: true
   vars:
     lab_profile: week8
   roles:
     - platform_common
-    - week8_readiness
+    - week8_capstone

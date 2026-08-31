@@ -1,0 +1,16 @@
+---
+- name: Enable target services
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop:
+    - named
+    - nfs-kernel-server
+    - postfix
+    - ssh
+    - smbd
+    - snmpd
+    - vsftpd
+    - wri-mail-lab
+    - wri-rsync-lab

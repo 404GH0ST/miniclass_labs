@@ -1,0 +1,19 @@
+---
+- name: Configure isolated SNMP
+  ansible.builtin.template:
+    src: snmpd.conf.j2
+    dest: /etc/snmp/snmpd.conf
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Restart snmpd
+
+- name: Configure the SSH enumeration banner
+  ansible.builtin.template:
+    src: ssh-lab.conf.j2
+    dest: /etc/ssh/sshd_config.d/99-wri-lab.conf
+    owner: root
+    group: root
+    mode: "0644"
+    validate: /usr/sbin/sshd -t -f %s
+  notify: Restart ssh
