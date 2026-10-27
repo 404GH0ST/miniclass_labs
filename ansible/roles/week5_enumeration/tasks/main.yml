@@ -1,5 +1,5 @@
 ---
-- name: Prepare Week 4 packages and remove retired services
+- name: Prepare Week 5 packages and remove retired services
   ansible.builtin.import_tasks: packages.yml
 
 - name: Load stable deployment flags
@@ -26,5 +26,5 @@
 - name: Configure NFS enumeration
   ansible.builtin.import_tasks: nfs.yml
 
-- name: Start Week 4 services
+- name: Start Week 5 services
   ansible.builtin.import_tasks: services.yml

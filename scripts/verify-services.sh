@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-target="${1:-192.168.56.40}"
+target="${1:-192.168.56.50}"
 tmp_dir="$(mktemp -d)"
 flags=()
 
@@ -84,7 +84,7 @@ imap_ssh_mail="$(printf 'a1 LOGIN analyst MailLab-Only-2026\r\na2 SELECT INBOX\r
 grep -q 'SSH username: operator' <<<"$imap_ssh_mail"
 grep -q 'SSH password: LlYcvWqWdJKvvnNmlruUY/bb' <<<"$imap_ssh_mail"
 
-nfs_content="$(vagrant ssh week4 -c \
+nfs_content="$(vagrant ssh week5 -c \
   "mount_dir=\$(mktemp -d); sudo mount -t nfs -o ro ${target}:/srv/nfs/public \"\$mount_dir\"; cat \"\$mount_dir/flag.txt\"; sudo umount \"\$mount_dir\"; rmdir \"\$mount_dir\"" \
   2>/dev/null)"
 record_flag NFS "$nfs_content"
@@ -100,8 +100,8 @@ test "$unique_count" -eq 10
 printf '[OK] All 10 services returned unique deployment-specific MD5 flags.\n'
 
 if nc -z -w 3 "$target" 80; then
-  printf '[FAIL] HTTP must be absent from the Week 4 target.\n' >&2
+  printf '[FAIL] HTTP must be absent from the Week 5 target.\n' >&2
   exit 1
 fi
 
-printf '[OK] HTTP is absent from the Week 4 target.\n'
+printf '[OK] HTTP is absent from the Week 5 target.\n'

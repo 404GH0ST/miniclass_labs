@@ -1,9 +1,10 @@
 ---
-- name: Configure the Week 5 web discovery target
+- name: Configure the Week 5 multi-service enumeration target
   hosts: week5
   become: true
   vars:
+    lab_ip: 192.168.56.50
     lab_profile: week5
   roles:
     - platform_common
-    - week5_web
+    - week5_enumeration

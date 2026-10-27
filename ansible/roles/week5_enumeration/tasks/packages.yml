@@ -35,7 +35,7 @@
     state: absent
     purge: true
 
-- name: Stop the retired Week 4 HTTP application
+- name: Stop the retired Week 5 HTTP application
   ansible.builtin.command:
     argv:
       - systemctl
@@ -46,7 +46,7 @@
   changed_when: retired_http_service.rc == 0
   failed_when: false
 
-- name: Remove retired Week 4 HTTP application files
+- name: Remove retired Week 5 HTTP application files
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
@@ -55,12 +55,12 @@
     - /etc/wri-http-lab.env
     - /var/www/training-app
 
-- name: Remove the retired Week 4 HTTP dependency
+- name: Remove the retired Week 5 HTTP dependency
   ansible.builtin.apt:
     name: python3-flask
     state: absent
     purge: true
 
-- name: Reload systemd after removing the Week 4 HTTP application
+- name: Reload systemd after removing the Week 5 HTTP application
   ansible.builtin.systemd:
     daemon_reload: true

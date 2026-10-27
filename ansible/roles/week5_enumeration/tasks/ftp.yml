@@ -16,7 +16,7 @@
     group: root
     mode: "0755"
 
-- name: Add the Week 4 FTP enumeration clue
+- name: Add the Week 5 FTP enumeration clue
   ansible.builtin.copy:
     content: |
       Training asset only. Record this flag in the evidence sheet.

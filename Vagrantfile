@@ -36,14 +36,9 @@ Vagrant.configure("2") do |config|
   end
 
   {
-    "week3" => "192.168.56.30",
-    "week4" => "192.168.56.40",
     "week5" => "192.168.56.50",
-    "week6" => "192.168.56.60",
-    "week7" => "192.168.56.70",
-    "week8" => "192.168.56.80",
   }.each do |name, address|
-    # Weekly targets must be selected explicitly (for example, `vagrant up week4`).
+    # The target must be selected explicitly (for example, `vagrant up week5`).
     # This prevents a bare `vagrant up` from consuming resources by deploying every
     # week's lab at once.
     config.vm.define name, autostart: false do |machine|
@@ -53,16 +48,10 @@ Vagrant.configure("2") do |config|
       if machine_bridge_enabled
         machine.vm.network "public_network", bridge: bridge_interface
       end
-      if name == "week4"
+      if name == "week5"
         machine.vm.provider "virtualbox" do |vb|
           vb.memory = 4096
           vb.cpus = 2
-        end
-      end
-      if name == "week8"
-        machine.vm.provider "virtualbox" do |vb|
-          vb.memory = 8192
-          vb.cpus = 4
         end
       end
       provision_with_ansible(machine, name, address, machine_bridge_enabled)

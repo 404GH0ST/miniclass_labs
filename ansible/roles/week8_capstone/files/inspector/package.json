@@ -1,8 +1,0 @@
-{
-  "name": "wri-week8-mcpjam-inspector-runtime",
-  "version": "1.0.0",
-  "private": true,
-  "dependencies": {
-    "@mcpjam/inspector": "1.4.2"
-  }
-}

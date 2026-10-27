@@ -9,20 +9,20 @@
         flags = {name: hashlib.md5(os.urandom(32)).hexdigest()
         for name in ['ftp', 'ssh', 'smb', 'rsync', 'snmp', 'smtp', 'pop3',
         'imap', 'dns_axfr', 'nfs']};
-        pathlib.Path('/etc/wri-week4-flags.json').write_text(json.dumps(flags))
-    creates: /etc/wri-week4-flags.json
+        pathlib.Path('/etc/wri-week5-flags.json').write_text(json.dumps(flags))
+    creates: /etc/wri-week5-flags.json
   no_log: true
 
 - name: Protect the deployment flag state
   ansible.builtin.file:
-    path: /etc/wri-week4-flags.json
+    path: /etc/wri-week5-flags.json
     owner: root
     group: root
     mode: "0600"
 
 - name: Read the deployment flag state
   ansible.builtin.slurp:
-    src: /etc/wri-week4-flags.json
+    src: /etc/wri-week5-flags.json
   register: deployment_flag_json
   no_log: true
 

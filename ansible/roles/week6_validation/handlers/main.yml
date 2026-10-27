@@ -1,6 +1,0 @@
----
-- name: Restart training app
-  ansible.builtin.systemd:
-    name: training-app
-    state: restarted
-    daemon_reload: true

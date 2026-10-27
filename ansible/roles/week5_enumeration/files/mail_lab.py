@@ -6,7 +6,7 @@ import socketserver
 import threading
 
 
-HOST = os.getenv("WRI_MAIL_HOST", "192.168.56.40")
+HOST = os.getenv("WRI_MAIL_HOST", "192.168.56.50")
 POP3_PORT = int(os.getenv("WRI_POP3_PORT", "110"))
 IMAP_PORT = int(os.getenv("WRI_IMAP_PORT", "143"))
 USERNAME = "analyst"
@@ -42,7 +42,7 @@ def messages_for(protocol, flag):
             "\r\n"
             f"SSH username: {SSH_USERNAME}\r\n"
             f"SSH password: {SSH_PASSWORD}\r\n"
-            "Use this account only against the isolated Week 4 target.\r\n"
+            "Use this account only against the isolated Week 5 target.\r\n"
         ),
     ]
 
