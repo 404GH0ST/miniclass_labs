@@ -1,0 +1,21 @@
+---
+- name: Reload nginx
+  ansible.builtin.service:
+    name: nginx
+    state: reloaded
+
+- name: Restart ssh
+  ansible.builtin.service:
+    name: ssh
+    state: restarted
+
+- name: Restart smbd
+  ansible.builtin.service:
+    name: smbd
+    state: restarted
+
+- name: Restart status lab
+  ansible.builtin.systemd:
+    name: wri-status-lab
+    state: restarted
+    daemon_reload: true

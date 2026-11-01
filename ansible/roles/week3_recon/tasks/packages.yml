@@ -1,0 +1,8 @@
+---
+- name: Install target services
+  ansible.builtin.apt:
+    name:
+      - nginx
+      - openssh-server
+      - samba
+    state: present

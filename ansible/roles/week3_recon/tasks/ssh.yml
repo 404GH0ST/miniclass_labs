@@ -1,0 +1,10 @@
+---
+- name: Configure the SSH reconnaissance banner
+  ansible.builtin.template:
+    src: ssh-lab.conf.j2
+    dest: /etc/ssh/sshd_config.d/99-wri-lab.conf
+    owner: root
+    group: root
+    mode: "0644"
+    validate: /usr/sbin/sshd -t -f %s
+  notify: Restart ssh

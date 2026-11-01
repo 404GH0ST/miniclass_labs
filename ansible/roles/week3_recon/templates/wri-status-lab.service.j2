@@ -1,0 +1,17 @@
+[Unit]
+Description=WRI CySec intentionally enumerable status lab
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=nobody
+Group=nogroup
+EnvironmentFile=/etc/wri-status-lab.env
+ExecStart=/usr/bin/python3 /opt/wri-status-lab.py
+Restart=on-failure
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

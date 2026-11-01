@@ -1,0 +1,21 @@
+---
+- name: Prepare Week 3 packages
+  ansible.builtin.import_tasks: packages.yml
+
+- name: Load stable deployment flags
+  ansible.builtin.import_tasks: flags.yml
+
+- name: Configure HTTP reconnaissance
+  ansible.builtin.import_tasks: http.yml
+
+- name: Configure SMB reconnaissance
+  ansible.builtin.import_tasks: smb.yml
+
+- name: Configure SSH reconnaissance
+  ansible.builtin.import_tasks: ssh.yml
+
+- name: Configure the uncommon status service
+  ansible.builtin.import_tasks: status.yml
+
+- name: Start Week 3 services
+  ansible.builtin.import_tasks: services.yml

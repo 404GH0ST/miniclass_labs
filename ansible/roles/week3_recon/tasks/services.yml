@@ -1,0 +1,11 @@
+---
+- name: Enable target services
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop:
+    - nginx
+    - ssh
+    - smbd
+    - wri-status-lab

@@ -1,0 +1,10 @@
+---
+- name: Configure the Week 3 active reconnaissance target
+  hosts: week3
+  become: true
+  vars:
+    lab_ip: 192.168.56.30
+    lab_profile: week3
+  roles:
+    - platform_common
+    - week3_recon

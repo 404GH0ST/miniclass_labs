@@ -1,0 +1,100 @@
+---
+- name: Remove the distribution default site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Reload nginx
+
+- name: Configure the Week 3 name-based virtual hosts
+  ansible.builtin.template:
+    src: nginx-blog.conf.j2
+    dest: /etc/nginx/sites-available/blog.wri.test.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload nginx
+
+- name: Enable the Week 3 virtual hosts
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/blog.wri.test.conf
+    dest: /etc/nginx/sites-enabled/blog.wri.test.conf
+    state: link
+  notify: Reload nginx
+
+- name: Validate the full nginx configuration
+  ansible.builtin.command:
+    argv:
+      - /usr/sbin/nginx
+      - -t
+  changed_when: false
+
+- name: Create the placeholder document root
+  ansible.builtin.file:
+    path: /var/www/html
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Add the placeholder landing page
+  ansible.builtin.copy:
+    content: |
+      <!DOCTYPE html>
+      <html lang="en">
+      <head><meta charset="utf-8"><title>WRI Training Target</title></head>
+      <body>
+        <h1>WRI CySec training target</h1>
+        <p>This address hosts several training web applications.</p>
+      </body>
+      </html>
+    dest: /var/www/html/index.html
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Create the blog document root
+  ansible.builtin.file:
+    path: /var/www/blog.wri.test
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Add the blog landing page
+  ansible.builtin.template:
+    src: blog-index.html.j2
+    dest: /var/www/blog.wri.test/index.html
+    owner: root
+    group: root
+    mode: "0644"
+  no_log: true
+
+- name: Add the blog robots file
+  ansible.builtin.copy:
+    content: |
+      User-agent: *
+      Disallow: /staging/
+    dest: /var/www/blog.wri.test/robots.txt
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Create the staging directory
+  ansible.builtin.file:
+    path: /var/www/blog.wri.test/staging
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Add the staging notes clue
+  ansible.builtin.copy:
+    content: |
+      Staging notes - internal only, do not publish.
+      HTTP enumeration flag: WRI{{ '{' }}{{ deployment_flags.http }}{{ '}' }}
+    dest: /var/www/blog.wri.test/staging/notes.txt
+    owner: root
+    group: root
+    mode: "0644"
+  no_log: true
+

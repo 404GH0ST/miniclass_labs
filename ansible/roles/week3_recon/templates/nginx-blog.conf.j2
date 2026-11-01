@@ -1,0 +1,17 @@
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+
+    root /var/www/html;
+    index index.html;
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name blog.wri.test;
+
+    root /var/www/blog.wri.test;
+    index index.html;
+}

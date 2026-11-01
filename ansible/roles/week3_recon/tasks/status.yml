@@ -1,0 +1,30 @@
+---
+- name: Store deployment flags for the status service
+  ansible.builtin.copy:
+    content: |
+      WRI_STATUS_HOST={{ lab_bind_ip }}
+      WRI_STATUS_FLAG=WRI{{ '{' }}{{ deployment_flags.status }}{{ '}' }}
+    dest: /etc/wri-status-lab.env
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Restart status lab
+  no_log: true
+
+- name: Deploy the intentionally enumerable status service
+  ansible.builtin.copy:
+    src: status_lab.py
+    dest: /opt/wri-status-lab.py
+    owner: root
+    group: root
+    mode: "0755"
+  notify: Restart status lab
+
+- name: Install the status lab service
+  ansible.builtin.template:
+    src: wri-status-lab.service.j2
+    dest: /etc/systemd/system/wri-status-lab.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart status lab

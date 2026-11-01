@@ -36,6 +36,7 @@ Vagrant.configure("2") do |config|
   end
 
   {
+    "week3" => "192.168.56.30",
     "week5" => "192.168.56.50",
   }.each do |name, address|
     # The target must be selected explicitly (for example, `vagrant up week5`).
