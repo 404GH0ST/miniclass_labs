@@ -3,6 +3,7 @@
   ansible.builtin.copy:
     content: |
       WRI_STATUS_HOST={{ lab_bind_ip }}
+      WRI_STATUS_PORT=11279
       WRI_STATUS_FLAG=WRI{{ '{' }}{{ deployment_flags.status }}{{ '}' }}
     dest: /etc/wri-status-lab.env
     owner: root

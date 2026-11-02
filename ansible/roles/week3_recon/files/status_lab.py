@@ -5,7 +5,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 FLAG = os.environ.get("WRI_STATUS_FLAG", "WRI{unavailable}")
 BIND = os.environ.get("WRI_STATUS_HOST", "127.0.0.1")
-PORT = int(os.environ.get("WRI_STATUS_PORT", "8083"))
+PORT = int(os.environ.get("WRI_STATUS_PORT", "11279"))
 
 PAGE = f"""<!DOCTYPE html>
 <html lang="en">

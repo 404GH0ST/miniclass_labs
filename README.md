@@ -34,42 +34,18 @@ A bare `vagrant up` starts nothing; every machine sets `autostart: false`.
 ### Project directory on NTFS/exFAT
 
 If the repository lives on an NTFS or exFAT mount, `chmod` is a no-op there and
-`vagrant up` fails with a "private key ... invalid permissions" error. Point the
-Vagrant data directory at a POSIX filesystem instead:
+`vagrant up` fails with a "private key ... invalid permissions" error. The
+Vagrantfile refuses to start in that situation and points at the remedies:
 
 ```bash
-export VAGRANT_DOTFILE_PATH="$HOME/.vagrant-miniclass"
-```
+# Option 1: wrapper that redirects Vagrant state to $HOME (recommended)
+scripts/lab.sh up week3
+scripts/lab.sh ssh week3
+scripts/lab.sh destroy week3 --force
 
-## Week 3: Active Reconnaissance
-
-The `week3` target exposes four services on `192.168.56.30`, each hiding one
-deployment-specific `WRI{...}` flag. Discover them with a port scan, then
-enumerate each service:
-
-| Service | Port | Flag location |
-|---|---:|---|
-| SSH | 22 | `VersionAddendum` in the pre-auth banner |
-| HTTP | 80 | HTML source of the `blog.wri.test` virtual host |
-| SMB | 445 | `flag.txt` inside the guest-accessible `public` share |
-| Status service | 8083 | HTML source of the uncommon status page |
-
-The HTTP flag is only served to the `blog.wri.test` subdomain. Before
-browsing, add the subdomain to your host's `/etc/hosts` (or
-`C:\Windows\System32\drivers\etc\hosts` on Windows):
-
-```
-192.168.56.30 blog.wri.test
-```
-
-Then browse to <http://blog.wri.test/> and inspect the page source.
-The bare IP serves a placeholder page instead, so finding the flag requires
-the subdomain plus virtual-host enumeration.
-
-Verify a deployment end-to-end from the host:
-
-```bash
-scripts/verify-week3.sh [target-ip]
+# Option 2: export the data directory yourself
+export VAGRANT_DOTFILE_PATH="$HOME/.vagrant"
+vagrant up week3
 ```
 
 ## Optional Classroom Network

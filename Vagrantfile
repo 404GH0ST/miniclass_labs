@@ -1,6 +1,35 @@
 bridge_interface = ENV["WRI_LAB_BRIDGE_INTERFACE"]
 bridge_enabled = !bridge_interface.nil? && !bridge_interface.empty?
 
+# Projects kept on NTFS/exFAT mounts cannot store the Vagrant SSH private key:
+# chmod is a no-op there, so the key keeps world-readable permissions and SSH
+# refuses it mid-boot ("private key ... invalid permissions"). Detect that case
+# and abort with the remedy for the commands that would actually hit it.
+begin
+  probe = File.join(Dir.pwd, ".vagrant-perm-probe-#{Process.pid}")
+  File.write(probe, "")
+  File.chmod(0o600, probe)
+  chmod_ok = (File.stat(probe).mode & 0o777) == 0o600
+ensure
+  File.delete(probe) if File.exist?(probe)
+end
+key_commands = %w[up ssh scp reload provision resume]
+if !chmod_ok && key_commands.include?(ARGV[0]) && ENV["VAGRANT_DOTFILE_PATH"].to_s.empty?
+  abort(<<~ERROR)
+    [WRI LAB] This project directory is on a filesystem without chmod support
+    (NTFS/exFAT), so Vagrant cannot secure its SSH private key there.
+
+    Fix, either:
+
+        scripts/lab.sh up week3          # wrapper redirects state to $HOME
+
+    or:
+
+        export VAGRANT_DOTFILE_PATH="$HOME/.vagrant"
+        vagrant up week3
+  ERROR
+end
+
 def provision_with_ansible(machine, machine_name, address, bridge_enabled)
   machine.vm.provision "ansible" do |ansible|
     ansible.playbook = "ansible/playbooks/#{machine_name}.yml"

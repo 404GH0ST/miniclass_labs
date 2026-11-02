@@ -44,7 +44,8 @@
       <head><meta charset="utf-8"><title>WRI Training Target</title></head>
       <body>
         <h1>WRI CySec training target</h1>
-        <p>This address hosts several training web applications.</p>
+        <p>This address hosts several training web applications.
+           Public-facing sites use names under the wri.test domain.</p>
       </body>
       </html>
     dest: /var/www/html/index.html
