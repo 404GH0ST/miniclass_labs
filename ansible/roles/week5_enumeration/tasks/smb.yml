@@ -10,9 +10,14 @@
 - name: Add the SMB enumeration clue
   ansible.builtin.copy:
     content: |
+      {% if lab_profile == 'week5_demo' %}
+      Synthetic VPN recovery note for the instructor demo.
+      {{ demo_disclosures.smb }}
+      {% else %}
       Guest-readable training share. Authentication testing is out of scope.
       SMB enumeration flag: WRI{{ '{' }}{{ deployment_flags.smb }}{{ '}' }}
-    dest: /srv/samba/public/flag.txt
+      {% endif %}
+    dest: "/srv/samba/public/{{ 'internal-notes.txt' if lab_profile == 'week5_demo' else 'flag.txt' }}"
     owner: nobody
     group: nogroup
     mode: "0644"

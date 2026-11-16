@@ -1,0 +1,21 @@
+---
+- name: Configure the Week 5 enumeration demo target
+  hosts: week5_demo
+  become: true
+  vars:
+    lab_ip: 192.168.56.51
+    lab_profile: week5_demo
+    demo_disclosures:
+      ftp: "DB_PASSWORD=demo-ftp-backup-2026"
+      ssh: "OPS-KEY=demo-ssh-inventory-2026"
+      smb: "VPN_RECOVERY_CODE=demo-smb-741852"
+      rsync: "BACKUP_TOKEN=demo-rsync-2026"
+      snmp: "RACK_ACCESS_CODE=demo-snmp-3951"
+      smtp: "HELPDESK_PIN=demo-smtp-8642"
+      pop3: "HR_EXPORT_PASSWORD=demo-pop3-2026"
+      imap: "FINANCE_ARCHIVE_KEY=demo-imap-2026"
+      dns_axfr: "INTERNAL_API_KEY=demo-dns-2026"
+      nfs: "SERVICE_ACCOUNT_PASSWORD=demo-nfs-2026"
+  roles:
+    - platform_common
+    - week5_enumeration

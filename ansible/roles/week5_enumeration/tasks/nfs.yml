@@ -10,9 +10,14 @@
 - name: Add the NFS enumeration clue
   ansible.builtin.copy:
     content: |
+      {% if lab_profile == 'week5_demo' %}
+      Synthetic service account note for the instructor demo.
+      {{ demo_disclosures.nfs }}
+      {% else %}
       Read-only training export. Mount only from the participant workstation.
       NFS enumeration flag: WRI{{ '{' }}{{ deployment_flags.nfs }}{{ '}' }}
-    dest: /srv/nfs/public/flag.txt
+      {% endif %}
+    dest: "/srv/nfs/public/{{ 'internal-notes.txt' if lab_profile == 'week5_demo' else 'flag.txt' }}"
     owner: nobody
     group: nogroup
     mode: "0644"

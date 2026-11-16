@@ -15,6 +15,9 @@ SSH_USERNAME = "operator"
 SSH_PASSWORD = "LlYcvWqWdJKvvnNmlruUY/bb"
 POP3_FLAG = os.getenv("WRI_POP3_FLAG", "WRI{deployment_flag_missing}")
 IMAP_FLAG = os.getenv("WRI_IMAP_FLAG", "WRI{deployment_flag_missing}")
+DEMO_MODE = os.getenv("WRI_DEMO_MODE") == "1"
+POP3_EVIDENCE = os.getenv("WRI_POP3_EVIDENCE", POP3_FLAG)
+IMAP_EVIDENCE = os.getenv("WRI_IMAP_EVIDENCE", IMAP_FLAG)
 
 BASE_MESSAGE = (
     "From: mentor@wri.local\r\n"
@@ -25,15 +28,17 @@ BASE_MESSAGE = (
 )
 
 
-def messages_for(protocol, flag):
+def messages_for(protocol, evidence):
+    subject = f"{protocol} internal note" if DEMO_MODE else f"{protocol} enumeration flag"
+    description = "Synthetic internal record" if DEMO_MODE else "Record this flag in the evidence sheet"
     return [
         BASE_MESSAGE,
         (
             "From: challenge@wri.local\r\n"
             "To: analyst@wri.local\r\n"
-            f"Subject: {protocol} enumeration flag\r\n"
+            f"Subject: {subject}\r\n"
             "\r\n"
-            f"Record this flag in the evidence sheet: {flag}\r\n"
+            f"{description}: {evidence}\r\n"
         ),
         (
             "From: infrastructure@wri.local\r\n"
@@ -47,8 +52,8 @@ def messages_for(protocol, flag):
     ]
 
 
-POP3_MESSAGES = messages_for("POP3", POP3_FLAG)
-IMAP_MESSAGES = messages_for("IMAP", IMAP_FLAG)
+POP3_MESSAGES = messages_for("POP3", POP3_EVIDENCE)
+IMAP_MESSAGES = messages_for("IMAP", IMAP_EVIDENCE)
 
 
 class ReusableThreadingServer(socketserver.ThreadingTCPServer):

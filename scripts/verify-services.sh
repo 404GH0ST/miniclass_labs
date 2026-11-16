@@ -2,11 +2,30 @@
 set -euo pipefail
 
 target="${1:-192.168.56.50}"
+profile="${2:-week5}"
 tmp_dir="$(mktemp -d)"
 flags=()
 
+if [[ "$profile" != week5 && "$profile" != week5_demo ]]; then
+  printf '[FAIL] Profile must be week5 or week5_demo.\n' >&2
+  exit 1
+fi
+
+if [[ "$profile" == week5_demo ]]; then
+  file_name=internal-notes.txt
+else
+  file_name=flag.txt
+fi
+
+declare -A demo_keys=(
+  [FTP]=DB_PASSWORD [SSH]=OPS-KEY [SMTP]=HELPDESK_PIN
+  [SMB]=VPN_RECOVERY_CODE [RSYNC]=BACKUP_TOKEN [SNMP]=RACK_ACCESS_CODE
+  ["DNS AXFR"]=INTERNAL_API_KEY [POP3]=HR_EXPORT_PASSWORD
+  [IMAP]=FINANCE_ARCHIVE_KEY [NFS]=SERVICE_ACCOUNT_PASSWORD
+)
+
 cleanup() {
-  rm -f "$tmp_dir/smb.txt" "$tmp_dir/rsync-flag.txt"
+  rm -f "$tmp_dir/smb.txt" "$tmp_dir/rsync-note.txt"
   rmdir "$tmp_dir"
 }
 trap cleanup EXIT
@@ -34,10 +53,14 @@ record_flag() {
   local service="$1"
   local content="$2"
   local flag
-  flag="$(grep -Eo 'WRI\{[0-9a-f]{32}\}' <<<"$content" | sed -n '1p')"
+  if [[ "$profile" == week5_demo ]]; then
+    flag="$(grep -Eo "${demo_keys[$service]}=demo-[A-Za-z0-9-]+" <<<"$content" | sed -n '1p')"
+  else
+    flag="$(grep -Eo 'WRI\{[0-9a-f]{32}\}' <<<"$content" | sed -n '1p')"
+  fi
   test -n "$flag"
   flags+=("$flag")
-  printf '[OK] %s flag: %s\n' "$service" "$flag"
+  printf '[OK] %s evidence: %s\n' "$service" "$flag"
 }
 
 check_tcp 21 FTP
@@ -51,18 +74,18 @@ check_tcp 445 SMB
 check_tcp 873 Rsync
 check_tcp 2049 NFS
 
-record_flag FTP "$(curl --connect-timeout 5 --max-time 15 --fail --silent "ftp://${target}/pub/flag.txt")"
+record_flag FTP "$(curl --connect-timeout 5 --max-time 15 --fail --silent "ftp://${target}/pub/${file_name}")"
 record_flag SSH "$(nc -w 3 "$target" 22 || true)"
 smtp_result="$(printf 'EHLO verify.wri.local\r\nQUIT\r\n' | nc -w 3 "$target" 25)"
 grep -q 'WRI-MAILGATE' <<<"$smtp_result"
 record_flag SMTP "$smtp_result"
 
-smbclient -N "//${target}/public" -c "get flag.txt $tmp_dir/smb.txt" >/dev/null
+smbclient -N "//${target}/public" -c "get $file_name $tmp_dir/smb.txt" >/dev/null
 record_flag SMB "$(<"$tmp_dir/smb.txt")"
 
 rsync "rsync://${target}/" | grep -q '^public'
-rsync "rsync://${target}/public/flag.txt" "$tmp_dir/rsync-flag.txt" >/dev/null
-record_flag RSYNC "$(<"$tmp_dir/rsync-flag.txt")"
+rsync "rsync://${target}/public/${file_name}" "$tmp_dir/rsync-note.txt" >/dev/null
+record_flag RSYNC "$(<"$tmp_dir/rsync-note.txt")"
 
 record_flag SNMP "$(snmpget -v2c -c public "$target" 1.3.6.1.2.1.1.6.0)"
 snmp_system_info="$(snmpwalk -v2c -c public "$target")"
@@ -84,8 +107,8 @@ imap_ssh_mail="$(printf 'a1 LOGIN analyst MailLab-Only-2026\r\na2 SELECT INBOX\r
 grep -q 'SSH username: operator' <<<"$imap_ssh_mail"
 grep -q 'SSH password: LlYcvWqWdJKvvnNmlruUY/bb' <<<"$imap_ssh_mail"
 
-nfs_content="$(vagrant ssh week5 -c \
-  "mount_dir=\$(mktemp -d); sudo mount -t nfs -o ro ${target}:/srv/nfs/public \"\$mount_dir\"; cat \"\$mount_dir/flag.txt\"; sudo umount \"\$mount_dir\"; rmdir \"\$mount_dir\"" \
+nfs_content="$(vagrant ssh "$profile" -c \
+  "mount_dir=\$(mktemp -d); sudo mount -t nfs -o ro ${target}:/srv/nfs/public \"\$mount_dir\"; cat \"\$mount_dir/${file_name}\"; sudo umount \"\$mount_dir\"; rmdir \"\$mount_dir\"" \
   2>/dev/null)"
 record_flag NFS "$nfs_content"
 
@@ -97,7 +120,11 @@ showmount -e "$target" | grep -q '/srv/nfs/public'
 unique_count="$(printf '%s\n' "${flags[@]}" | sort -u | wc -l | tr -d ' ')"
 test "$unique_count" -eq 10
 
-printf '[OK] All 10 services returned unique deployment-specific MD5 flags.\n'
+if [[ "$profile" == week5_demo ]]; then
+  printf '[OK] All 10 services returned distinct synthetic sensitive records.\n'
+else
+  printf '[OK] All 10 services returned unique deployment-specific MD5 flags.\n'
+fi
 
 if nc -z -w 3 "$target" 80; then
   printf '[FAIL] HTTP must be absent from the Week 5 target.\n' >&2

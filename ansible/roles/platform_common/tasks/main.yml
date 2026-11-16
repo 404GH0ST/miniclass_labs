@@ -19,3 +19,4 @@
     marker: "# {mark} WRI CYSEC LAB"
     block: |
       192.168.56.50 week5
+      192.168.56.51 week5-demo

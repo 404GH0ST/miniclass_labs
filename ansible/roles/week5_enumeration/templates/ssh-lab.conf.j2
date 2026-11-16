@@ -1,4 +1,4 @@
-VersionAddendum WRI{{ '{' }}{{ deployment_flags.ssh }}{{ '}' }}
+VersionAddendum {{ demo_disclosures.ssh if lab_profile == 'week5_demo' else 'WRI{' ~ deployment_flags.ssh ~ '}' }}
 PermitRootLogin no
 
 Match User operator

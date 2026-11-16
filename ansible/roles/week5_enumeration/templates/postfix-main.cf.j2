@@ -6,6 +6,6 @@ inet_interfaces = {{ 'all' if lab_bridge_enabled else lab_ip ~ ', 127.0.0.1' }}
 inet_protocols = ipv4
 mydestination = $myhostname, localhost.$mydomain, localhost
 mynetworks = 127.0.0.0/8
-smtpd_banner = $myhostname ESMTP WRI-MAILGATE WRI{{ '{' }}{{ deployment_flags.smtp }}{{ '}' }}
+smtpd_banner = $myhostname ESMTP WRI-MAILGATE {{ demo_disclosures.smtp if lab_profile == 'week5_demo' else 'WRI{' ~ deployment_flags.smtp ~ '}' }}
 smtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination
 relayhost =

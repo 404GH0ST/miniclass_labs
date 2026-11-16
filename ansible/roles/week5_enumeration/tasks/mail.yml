@@ -1,10 +1,16 @@
 ---
-- name: Store deployment flags for local mail services
+- name: Store deployment evidence for local mail services
   ansible.builtin.copy:
     content: |
       WRI_MAIL_HOST={{ lab_bind_ip }}
+      {% if lab_profile == 'week5_demo' %}
+      WRI_DEMO_MODE=1
+      WRI_POP3_EVIDENCE={{ demo_disclosures.pop3 }}
+      WRI_IMAP_EVIDENCE={{ demo_disclosures.imap }}
+      {% else %}
       WRI_POP3_FLAG=WRI{{ '{' }}{{ deployment_flags.pop3 }}{{ '}' }}
       WRI_IMAP_FLAG=WRI{{ '{' }}{{ deployment_flags.imap }}{{ '}' }}
+      {% endif %}
     dest: /etc/wri-mail-lab.env
     owner: root
     group: root

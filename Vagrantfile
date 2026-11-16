@@ -37,18 +37,19 @@ Vagrant.configure("2") do |config|
 
   {
     "week5" => "192.168.56.50",
+    "week5_demo" => "192.168.56.51",
   }.each do |name, address|
     # The target must be selected explicitly (for example, `vagrant up week5`).
     # This prevents a bare `vagrant up` from consuming resources by deploying every
     # week's lab at once.
     config.vm.define name, autostart: false do |machine|
       machine_bridge_enabled = bridge_enabled
-      machine.vm.hostname = name
+      machine.vm.hostname = name.tr("_", "-")
       machine.vm.network "private_network", ip: address
       if machine_bridge_enabled
         machine.vm.network "public_network", bridge: bridge_interface
       end
-      if name == "week5"
+      if name.start_with?("week5")
         machine.vm.provider "virtualbox" do |vb|
           vb.memory = 4096
           vb.cpus = 2

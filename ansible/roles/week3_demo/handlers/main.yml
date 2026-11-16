@@ -1,0 +1,15 @@
+---
+- name: Reload demo nginx
+  ansible.builtin.service:
+    name: nginx
+    state: reloaded
+
+- name: Restart demo smbd
+  ansible.builtin.service:
+    name: smbd
+    state: restarted
+
+- name: Restart demo dnsmasq
+  ansible.builtin.service:
+    name: dnsmasq
+    state: restarted

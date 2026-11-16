@@ -4,6 +4,7 @@
 
 - name: Load stable deployment flags
   ansible.builtin.import_tasks: flags.yml
+  when: lab_profile == 'week5'
 
 - name: Configure FTP enumeration
   ansible.builtin.import_tasks: ftp.yml

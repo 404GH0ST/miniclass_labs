@@ -1,0 +1,115 @@
+---
+- name: Install demonstration services
+  ansible.builtin.apt:
+    name:
+      - nginx
+      - openssh-server
+      - samba
+      - dnsmasq
+    state: present
+
+- name: Remove the distribution default web site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Reload demo nginx
+
+- name: Create demonstration web roots
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - /var/www/wri-demo
+    - /var/www/wri-demo-status
+
+- name: Add demonstration web pages
+  ansible.builtin.copy:
+    content: |
+      <!DOCTYPE html>
+      <html lang="en">
+      <head><meta charset="utf-8"><title>{{ item.title }}</title></head>
+      <body><h1>{{ item.title }}</h1><p>{{ item.description }}</p></body>
+      </html>
+    dest: "{{ item.root }}/index.html"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - root: /var/www/wri-demo
+      title: WRI Nmap Demo
+      description: Active reconnaissance and network scanning demonstration.
+    - root: /var/www/wri-demo-status
+      title: WRI Demo Status
+      description: Service running on an alternate HTTP port.
+
+- name: Configure the demonstration HTTP listeners
+  ansible.builtin.template:
+    src: nginx-demo.conf.j2
+    dest: /etc/nginx/sites-available/wri-demo.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload demo nginx
+
+- name: Enable the demonstration web site
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/wri-demo.conf
+    dest: /etc/nginx/sites-enabled/wri-demo.conf
+    state: link
+  notify: Reload demo nginx
+
+- name: Validate the full nginx configuration
+  ansible.builtin.command: /usr/sbin/nginx -t
+  changed_when: false
+
+- name: Create the read-only demonstration SMB share
+  ansible.builtin.file:
+    path: /srv/samba/public
+    state: directory
+    owner: nobody
+    group: nogroup
+    mode: "0755"
+
+- name: Add a plain demonstration document to SMB
+  ansible.builtin.copy:
+    content: |
+      WRI Nmap Demo
+      This read-only share demonstrates SMB service discovery.
+    dest: /srv/samba/public/readme.txt
+    owner: nobody
+    group: nogroup
+    mode: "0644"
+
+- name: Configure demonstration SMB
+  ansible.builtin.template:
+    src: smb-demo.conf.j2
+    dest: /etc/samba/smb.conf
+    owner: root
+    group: root
+    mode: "0644"
+    validate: /usr/bin/testparm -s %s
+  notify: Restart demo smbd
+
+- name: Configure local demonstration DNS without DHCP or upstream forwarding
+  ansible.builtin.template:
+    src: dnsmasq-demo.conf.j2
+    dest: /etc/dnsmasq.conf
+    owner: root
+    group: root
+    mode: "0644"
+    validate: /usr/sbin/dnsmasq --test --conf-file=%s
+  notify: Restart demo dnsmasq
+
+- name: Enable demonstration services
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop:
+    - nginx
+    - ssh
+    - smbd
+    - dnsmasq

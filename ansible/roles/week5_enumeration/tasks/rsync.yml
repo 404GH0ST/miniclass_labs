@@ -10,9 +10,14 @@
 - name: Add the rsync enumeration flag
   ansible.builtin.copy:
     content: |
+      {% if lab_profile == 'week5_demo' %}
+      Synthetic backup credential note for the instructor demo.
+      {{ demo_disclosures.rsync }}
+      {% else %}
       Anonymous read-only rsync training module.
       Rsync enumeration flag: WRI{{ '{' }}{{ deployment_flags.rsync }}{{ '}' }}
-    dest: /srv/rsync/public/flag.txt
+      {% endif %}
+    dest: "/srv/rsync/public/{{ 'internal-notes.txt' if lab_profile == 'week5_demo' else 'flag.txt' }}"
     owner: root
     group: root
     mode: "0644"

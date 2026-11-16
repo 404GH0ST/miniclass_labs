@@ -8,4 +8,4 @@ ftp     IN  CNAME target
 mail    IN  CNAME target
 files   IN  CNAME target
 intranet IN CNAME target
-replica-catalog IN TXT "WRI{{ '{' }}{{ deployment_flags.dns_axfr }}{{ '}' }}"
+replica-catalog IN TXT "{{ demo_disclosures.dns_axfr if lab_profile == 'week5_demo' else 'WRI{' ~ deployment_flags.dns_axfr ~ '}' }}"

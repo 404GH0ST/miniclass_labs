@@ -1,0 +1,12 @@
+# DNS only: no DHCP ranges and no upstream DNS queries.
+port=53
+bind-dynamic
+except-interface=lo
+{% if not lab_bridge_enabled %}
+listen-address={{ lab_ip }}
+{% endif %}
+no-resolv
+no-hosts
+local=/demo.wri.test/
+host-record=demo.wri.test,{{ lab_ip }}
+txt-record=demo.wri.test,"WRI Nmap Demo DNS"

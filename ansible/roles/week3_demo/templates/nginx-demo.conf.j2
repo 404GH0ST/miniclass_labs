@@ -1,0 +1,13 @@
+server {
+    listen 80 default_server;
+    server_name _;
+    root /var/www/wri-demo;
+    index index.html;
+}
+
+server {
+    listen 8080 default_server;
+    server_name _;
+    root /var/www/wri-demo-status;
+    index index.html;
+}
