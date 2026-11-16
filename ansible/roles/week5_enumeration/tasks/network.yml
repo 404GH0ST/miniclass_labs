@@ -1,0 +1,22 @@
+---
+- name: Find the classroom bridge IPv4 address
+  ansible.builtin.set_fact:
+    lab_bridge_ips: >-
+      {{ ansible_facts['all_ipv4_addresses']
+         | reject('equalto', lab_ip)
+         | reject('match', '^10[.]0[.]2[.]')
+         | list }}
+  when: lab_bridge_enabled | bool
+
+- name: Require one classroom bridge IPv4 address
+  ansible.builtin.assert:
+    that:
+      - lab_bridge_ips | length == 1
+    fail_msg: >-
+      Expected one bridge IPv4 address besides the Vagrant NAT and host-only
+      addresses. Check that the classroom bridge has received a DHCP lease.
+  when: lab_bridge_enabled | bool
+
+- name: Select the address published in the training DNS zone
+  ansible.builtin.set_fact:
+    lab_dns_ip: "{{ lab_bridge_ips[0] if lab_bridge_enabled | bool else lab_ip }}"

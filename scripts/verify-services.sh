@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-target="${1:-192.168.56.50}"
 profile="${2:-week5}"
 tmp_dir="$(mktemp -d)"
 flags=()
@@ -12,10 +11,18 @@ if [[ "$profile" != week5 && "$profile" != week5_demo ]]; then
 fi
 
 if [[ "$profile" == week5_demo ]]; then
+  host_only_ip=192.168.56.51
   file_name=internal-notes.txt
+  ssh_username=demo_operator
+  ssh_password='DemoSsh-Only-2026!'
 else
+  host_only_ip=192.168.56.50
   file_name=flag.txt
+  ssh_username=operator
+  ssh_password='LlYcvWqWdJKvvnNmlruUY/bb'
 fi
+target="${1:-$host_only_ip}"
+dns_expected_ip="${3:-$target}"
 
 declare -A demo_keys=(
   [FTP]=DB_PASSWORD [SSH]=OPS-KEY [SMTP]=HELPDESK_PIN
@@ -32,6 +39,10 @@ trap cleanup EXIT
 
 if [[ ! "$target" =~ ^[0-9a-fA-F:.]+$ ]]; then
   printf '[FAIL] Target must be an IPv4 or IPv6 address.\n' >&2
+  exit 1
+fi
+if [[ ! "$dns_expected_ip" =~ ^[0-9a-fA-F:.]+$ ]]; then
+  printf '[FAIL] Expected DNS address must be an IPv4 or IPv6 address.\n' >&2
   exit 1
 fi
 
@@ -76,7 +87,7 @@ check_tcp 2049 NFS
 
 record_flag FTP "$(curl --connect-timeout 5 --max-time 15 --fail --silent "ftp://${target}/pub/${file_name}")"
 record_flag SSH "$(nc -w 3 "$target" 22 || true)"
-smtp_result="$(printf 'EHLO verify.wri.local\r\nQUIT\r\n' | nc -w 3 "$target" 25)"
+smtp_result="$(printf 'EHLO verify.wri.local\r\nQUIT\r\n' | nc -w 8 "$target" 25 || true)"
 grep -q 'WRI-MAILGATE' <<<"$smtp_result"
 record_flag SMTP "$smtp_result"
 
@@ -95,26 +106,26 @@ dns_axfr="$(dig "@${target}" wri.local AXFR)"
 grep -q 'intranet\.wri\.local\.' <<<"$dns_axfr"
 record_flag 'DNS AXFR' "$(grep 'replica-catalog\.wri\.local\.' <<<"$dns_axfr")"
 
-pop3_result="$(printf 'USER analyst\r\nPASS MailLab-Only-2026\r\nRETR 2\r\nQUIT\r\n' | nc -w 3 "$target" 110)"
+pop3_result="$(printf 'USER analyst\r\nPASS MailLab-Only-2026\r\nRETR 2\r\nQUIT\r\n' | nc -w 8 "$target" 110 || true)"
 record_flag POP3 "$pop3_result"
-pop3_ssh_mail="$(printf 'USER analyst\r\nPASS MailLab-Only-2026\r\nRETR 3\r\nQUIT\r\n' | nc -w 3 "$target" 110)"
-grep -q 'SSH username: operator' <<<"$pop3_ssh_mail"
-grep -q 'SSH password: LlYcvWqWdJKvvnNmlruUY/bb' <<<"$pop3_ssh_mail"
+pop3_ssh_mail="$(printf 'USER analyst\r\nPASS MailLab-Only-2026\r\nRETR 3\r\nQUIT\r\n' | nc -w 8 "$target" 110 || true)"
+grep -Fq "SSH username: $ssh_username" <<<"$pop3_ssh_mail"
+grep -Fq "SSH password: $ssh_password" <<<"$pop3_ssh_mail"
 
-imap_result="$(printf 'a1 LOGIN analyst MailLab-Only-2026\r\na2 SELECT INBOX\r\na3 FETCH 2 BODY[]\r\na4 LOGOUT\r\n' | nc -w 3 "$target" 143)"
+imap_result="$(printf 'a1 LOGIN analyst MailLab-Only-2026\r\na2 SELECT INBOX\r\na3 FETCH 2 BODY[]\r\na4 LOGOUT\r\n' | nc -w 8 "$target" 143 || true)"
 record_flag IMAP "$imap_result"
-imap_ssh_mail="$(printf 'a1 LOGIN analyst MailLab-Only-2026\r\na2 SELECT INBOX\r\na3 FETCH 3 BODY[]\r\na4 LOGOUT\r\n' | nc -w 3 "$target" 143)"
-grep -q 'SSH username: operator' <<<"$imap_ssh_mail"
-grep -q 'SSH password: LlYcvWqWdJKvvnNmlruUY/bb' <<<"$imap_ssh_mail"
+imap_ssh_mail="$(printf 'a1 LOGIN analyst MailLab-Only-2026\r\na2 SELECT INBOX\r\na3 FETCH 3 BODY[]\r\na4 LOGOUT\r\n' | nc -w 8 "$target" 143 || true)"
+grep -Fq "SSH username: $ssh_username" <<<"$imap_ssh_mail"
+grep -Fq "SSH password: $ssh_password" <<<"$imap_ssh_mail"
 
 nfs_content="$(vagrant ssh "$profile" -c \
   "mount_dir=\$(mktemp -d); sudo mount -t nfs -o ro ${target}:/srv/nfs/public \"\$mount_dir\"; cat \"\$mount_dir/${file_name}\"; sudo umount \"\$mount_dir\"; rmdir \"\$mount_dir\"" \
   2>/dev/null)"
 record_flag NFS "$nfs_content"
 
-dig +short "@${target}" target.wri.local A | grep -qx "$target"
-dig +short "@${target}" intranet.wri.local A | grep -qx "$target"
-dig +short "@${target}" -x "$target" | grep -qx 'target.wri.local.'
+dig +short "@${target}" target.wri.local A | grep -qx "$dns_expected_ip"
+dig +short "@${target}" intranet.wri.local A | grep -qx "$dns_expected_ip"
+dig +short "@${target}" -x "$host_only_ip" | grep -qx 'target.wri.local.'
 showmount -e "$target" | grep -q '/srv/nfs/public'
 
 unique_count="$(printf '%s\n' "${flags[@]}" | sort -u | wc -l | tr -d ' ')"

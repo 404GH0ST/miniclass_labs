@@ -1,5 +1,5 @@
 VersionAddendum {{ demo_disclosures.ssh if lab_profile == 'week5_demo' else 'WRI{' ~ deployment_flags.ssh ~ '}' }}
 PermitRootLogin no
 
-Match User operator
+Match User {{ demo_ssh_username if lab_profile == 'week5_demo' else 'operator' }}
     PasswordAuthentication yes

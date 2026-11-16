@@ -11,8 +11,8 @@ POP3_PORT = int(os.getenv("WRI_POP3_PORT", "110"))
 IMAP_PORT = int(os.getenv("WRI_IMAP_PORT", "143"))
 USERNAME = "analyst"
 PASSWORD = "MailLab-Only-2026"
-SSH_USERNAME = "operator"
-SSH_PASSWORD = "LlYcvWqWdJKvvnNmlruUY/bb"
+SSH_USERNAME = os.getenv("WRI_SSH_USERNAME", "operator")
+SSH_PASSWORD = os.getenv("WRI_SSH_PASSWORD", "LlYcvWqWdJKvvnNmlruUY/bb")
 POP3_FLAG = os.getenv("WRI_POP3_FLAG", "WRI{deployment_flag_missing}")
 IMAP_FLAG = os.getenv("WRI_IMAP_FLAG", "WRI{deployment_flag_missing}")
 DEMO_MODE = os.getenv("WRI_DEMO_MODE") == "1"

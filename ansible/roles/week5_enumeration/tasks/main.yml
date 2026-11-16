@@ -21,6 +21,9 @@
 - name: Configure mail enumeration
   ansible.builtin.import_tasks: mail.yml
 
+- name: Select the DNS address for this network
+  ansible.builtin.import_tasks: network.yml
+
 - name: Configure DNS enumeration
   ansible.builtin.import_tasks: dns.yml
 

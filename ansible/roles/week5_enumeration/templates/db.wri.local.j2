@@ -1,9 +1,9 @@
-$TTL 3600
+$TTL {{ 60 if lab_bridge_enabled else 3600 }}
 @   IN  SOA ns1.wri.local. admin.wri.local. (
-        2026082901 3600 900 604800 300 )
+        {{ ansible_facts['date_time']['epoch'] if lab_bridge_enabled else 2026082901 }} 3600 900 604800 300 )
     IN  NS  ns1.wri.local.
-ns1     IN  A   {{ lab_ip }}
-target  IN  A   {{ lab_ip }}
+ns1     IN  A   {{ lab_dns_ip }}
+target  IN  A   {{ lab_dns_ip }}
 ftp     IN  CNAME target
 mail    IN  CNAME target
 files   IN  CNAME target

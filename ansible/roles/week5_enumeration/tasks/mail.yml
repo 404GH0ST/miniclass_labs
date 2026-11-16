@@ -7,6 +7,8 @@
       WRI_DEMO_MODE=1
       WRI_POP3_EVIDENCE={{ demo_disclosures.pop3 }}
       WRI_IMAP_EVIDENCE={{ demo_disclosures.imap }}
+      WRI_SSH_USERNAME={{ demo_ssh_username }}
+      WRI_SSH_PASSWORD={{ demo_ssh_password }}
       {% else %}
       WRI_POP3_FLAG=WRI{{ '{' }}{{ deployment_flags.pop3 }}{{ '}' }}
       WRI_IMAP_FLAG=WRI{{ '{' }}{{ deployment_flags.imap }}{{ '}' }}
@@ -29,10 +31,18 @@
 
 - name: Create the mail-disclosed SSH training account
   ansible.builtin.user:
-    name: operator
-    password: "$6$wri-mail-ssh$iHyUCGqwkBmqkKOe3AbIuy/.I2W9bBsWzN0TsrAuoDy2z5BN3ilpvVO2Im0wPGuyhtwgsL29bpWogODGBPSoK1"
+    name: "{{ demo_ssh_username if lab_profile == 'week5_demo' else 'operator' }}"
+    password: "{{ demo_ssh_password_hash if lab_profile == 'week5_demo' else '$6$wri-mail-ssh$iHyUCGqwkBmqkKOe3AbIuy/.I2W9bBsWzN0TsrAuoDy2z5BN3ilpvVO2Im0wPGuyhtwgsL29bpWogODGBPSoK1' }}"
     shell: /bin/bash
     create_home: true
+  no_log: true
+
+- name: Remove the old shared SSH account from the demo target
+  ansible.builtin.user:
+    name: operator
+    state: absent
+    remove: false
+  when: lab_profile == 'week5_demo'
   no_log: true
 
 - name: Deploy the intentionally enumerable POP3 and IMAP service
