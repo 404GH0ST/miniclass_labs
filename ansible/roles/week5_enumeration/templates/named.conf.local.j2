@@ -9,3 +9,11 @@ zone "56.168.192.in-addr.arpa" {
     file "/etc/bind/db.192.168.56";
     allow-transfer { none; };
 };
+
+{% if lab_bridge_enabled %}
+zone "{{ lab_dns_ip.split('.') | reverse | join('.') }}.in-addr.arpa" {
+    type primary;
+    file "/etc/bind/db.bridge-ip";
+    allow-transfer { none; };
+};
+{% endif %}

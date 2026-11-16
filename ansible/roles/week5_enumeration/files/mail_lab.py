@@ -9,8 +9,8 @@ import threading
 HOST = os.getenv("WRI_MAIL_HOST", "192.168.56.50")
 POP3_PORT = int(os.getenv("WRI_POP3_PORT", "110"))
 IMAP_PORT = int(os.getenv("WRI_IMAP_PORT", "143"))
-USERNAME = "analyst"
-PASSWORD = "MailLab-Only-2026"
+USERNAME = os.getenv("WRI_MAIL_USERNAME", "analyst")
+PASSWORD = os.getenv("WRI_MAIL_PASSWORD", "MailLab-Only-2026")
 SSH_USERNAME = os.getenv("WRI_SSH_USERNAME", "operator")
 SSH_PASSWORD = os.getenv("WRI_SSH_PASSWORD", "LlYcvWqWdJKvvnNmlruUY/bb")
 POP3_FLAG = os.getenv("WRI_POP3_FLAG", "WRI{deployment_flag_missing}")
@@ -21,7 +21,7 @@ IMAP_EVIDENCE = os.getenv("WRI_IMAP_EVIDENCE", IMAP_FLAG)
 
 BASE_MESSAGE = (
     "From: mentor@wri.local\r\n"
-    "To: analyst@wri.local\r\n"
+    f"To: {USERNAME}@wri.local\r\n"
     "Subject: Mail service verification\r\n"
     "\r\n"
     "The training mailbox is working.\r\n"
@@ -35,14 +35,14 @@ def messages_for(protocol, evidence):
         BASE_MESSAGE,
         (
             "From: challenge@wri.local\r\n"
-            "To: analyst@wri.local\r\n"
+            f"To: {USERNAME}@wri.local\r\n"
             f"Subject: {subject}\r\n"
             "\r\n"
             f"{description}: {evidence}\r\n"
         ),
         (
             "From: infrastructure@wri.local\r\n"
-            "To: analyst@wri.local\r\n"
+            f"To: {USERNAME}@wri.local\r\n"
             "Subject: SSH training account\r\n"
             "\r\n"
             f"SSH username: {SSH_USERNAME}\r\n"
@@ -88,7 +88,7 @@ class Pop3Handler(socketserver.StreamRequestHandler):
             elif command == "PASS":
                 authenticated = selected_user == USERNAME and argument == PASSWORD
                 if authenticated:
-                    self.send("+OK analyst mailbox opened")
+                    self.send(f"+OK {USERNAME} mailbox opened")
                 else:
                     self.send("-ERR authentication failed")
             elif command == "STAT" and authenticated:

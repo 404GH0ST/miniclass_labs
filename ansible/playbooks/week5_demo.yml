@@ -8,6 +8,8 @@
     demo_ssh_username: demo_operator
     demo_ssh_password: "DemoSsh-Only-2026!"
     demo_ssh_password_hash: "$6$wri-demo-ssh$7k2H88davn/KqSkuMP8hMll9GZGGrteUf2Jg8GMsMPSgUiE37W5R2lOZGrZ2RoPo3ZqOHhz5Pg0tyquMjCnst1"
+    demo_mail_username: demo_analyst
+    demo_mail_password: "DemoMail-Only-2026!"
     demo_disclosures:
       ftp: "DB_PASSWORD=demo-ftp-backup-2026"
       ssh: "OPS-KEY=demo-ssh-inventory-2026"

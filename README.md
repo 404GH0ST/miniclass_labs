@@ -32,7 +32,7 @@ vagrant up week5_demo
 scripts/verify-services.sh 192.168.56.51 week5_demo
 ```
 
-The demo exposes `internal-notes.txt` over FTP, SMB, rsync, and NFS. Other records appear in the SSH and SMTP banners, SNMP system location, POP3 and IMAP mailboxes, and DNS zone transfer. The SNMP contact still reveals the training mailbox credentials, and a mailbox message reveals the training SSH account. The demo SSH account is `demo_operator` with a separate password; the participant target keeps its `operator` account. Run `scripts/verify-services.sh` for the original `week5` target.
+The demo exposes `internal-notes.txt` over FTP, SMB, rsync, and NFS. Other records appear in the SSH and SMTP banners, SNMP system location, POP3 and IMAP mailboxes, and DNS zone transfer. The SNMP contact reveals the demo mailbox credentials (`demo_analyst` with a separate password), and a mailbox message reveals the demo SSH account (`demo_operator` with a separate password). The participant target keeps its `analyst` mailbox and `operator` SSH account. Run `scripts/verify-services.sh` for the original `week5` target.
 
 ## Optional Classroom Network
 
@@ -55,7 +55,9 @@ Find the bridged address after startup:
 vagrant ssh week5_demo -c "ip -4 -brief address"
 ```
 
-The host-only addresses (`192.168.56.50` and `192.168.56.51`) remain on the VMs. Bridging adds another interface whose IP comes from the classroom network and may change. During provisioning, Ansible detects that IP and publishes it in the `ns1.wri.local` and `target.wri.local` DNS A records. The host-only reverse DNS zone still maps `.50` or `.51` to `target.wri.local`; the classroom router owns reverse DNS for the bridged subnet. Give participants the current bridged IP for their first scan or DNS query.
+The host-only addresses (`192.168.56.50` and `192.168.56.51`) remain on the VMs. Bridging adds another interface whose IP comes from the classroom network and may change. During provisioning, Ansible detects that IP and publishes it in the `ns1.wri.local` and `target.wri.local` DNS A records. The target also serves a PTR record for its exact bridged IP. Give participants the current bridged IP for their first scan or DNS query.
+
+Query the target directly to check its reverse record: `dig @<bridged-ip> -x <bridged-ip>`. A plain `dig -x <bridged-ip>` uses the participant workstation's configured DNS resolver; it will return the lab PTR only if the classroom DNS delegates that reverse name to the target or sends the query to it.
 
 Keep `WRI_LAB_BRIDGE_INTERFACE` set whenever you run `vagrant reload` or `vagrant provision`; Ansible uses it to enable listeners and access from the classroom network. If DHCP later changes the bridge IP, rerun provisioning with the same variable so the DNS A records are updated. Resolver caches may retain the previous A record for up to 60 seconds:
 

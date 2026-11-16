@@ -1,5 +1,5 @@
 agentAddress udp:{{ lab_bind_ip }}:161
 sysLocation WRI CySec isolated training lab {{ demo_disclosures.snmp if lab_profile == 'week5_demo' else 'WRI{' ~ deployment_flags.snmp ~ '}' }}
-sysContact /opt/wri-mail-lab.py --username analyst --password MailLab-Only-2026
+sysContact /opt/wri-mail-lab.py --username {{ demo_mail_username if lab_profile == 'week5_demo' else 'analyst' }} --password {{ demo_mail_password if lab_profile == 'week5_demo' else 'MailLab-Only-2026' }}
 sysName target.wri.local
 rocommunity public {{ lab_allowed_network }}

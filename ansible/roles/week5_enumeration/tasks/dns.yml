@@ -34,3 +34,20 @@
     group: bind
     mode: "0644"
   notify: Restart named
+
+- name: Install the bridge address reverse DNS zone data
+  ansible.builtin.template:
+    src: db.bridge-ip.j2
+    dest: /etc/bind/db.bridge-ip
+    owner: root
+    group: bind
+    mode: "0644"
+  when: lab_bridge_enabled | bool
+  notify: Restart named
+
+- name: Remove the bridge reverse DNS zone data in host-only mode
+  ansible.builtin.file:
+    path: /etc/bind/db.bridge-ip
+    state: absent
+  when: not lab_bridge_enabled | bool
+  notify: Restart named

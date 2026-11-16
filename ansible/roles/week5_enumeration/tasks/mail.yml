@@ -9,6 +9,8 @@
       WRI_IMAP_EVIDENCE={{ demo_disclosures.imap }}
       WRI_SSH_USERNAME={{ demo_ssh_username }}
       WRI_SSH_PASSWORD={{ demo_ssh_password }}
+      WRI_MAIL_USERNAME={{ demo_mail_username }}
+      WRI_MAIL_PASSWORD={{ demo_mail_password }}
       {% else %}
       WRI_POP3_FLAG=WRI{{ '{' }}{{ deployment_flags.pop3 }}{{ '}' }}
       WRI_IMAP_FLAG=WRI{{ '{' }}{{ deployment_flags.imap }}{{ '}' }}
